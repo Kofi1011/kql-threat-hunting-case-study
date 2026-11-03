@@ -1,0 +1,10 @@
+// Adapted template; not executed in this sanitized form.
+// Purpose: inspect available groups before applying a narrow RunId filter.
+let StartTime = datetime(2026-01-01T00:00:00Z); // Replace for your dataset.
+let EndTime = datetime(2026-01-02T00:00:00Z);
+DeviceProcessEvents_CL
+| where TimeGenerated between (StartTime .. EndTime)
+| summarize Records=count(), FirstSeen=min(TimeGenerated), LastSeen=max(TimeGenerated)
+    by HuntName, RunId, DeviceName
+| order by HuntName asc, DeviceName asc
+

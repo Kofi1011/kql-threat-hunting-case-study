@@ -1,0 +1,14 @@
+# Keep private evidence, credentials and raw exports out of this repository.
+.env
+.env.*
+*.log
+*.har
+*.pcap
+*.pcapng
+*.zip
+private/
+raw-exports/
+__pycache__/
+.DS_Store
+Thumbs.db
+

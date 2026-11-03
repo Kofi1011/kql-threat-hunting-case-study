@@ -1,0 +1,13 @@
+// Adapted template; not executed in this sanitized form.
+// Process identity/account context can be more useful than the destination port.
+let StartTime = datetime(2026-01-01T08:00:00Z);
+let EndTime = datetime(2026-01-01T08:30:00Z);
+let TargetDevice = "lab-web01";
+DeviceNetworkEvents_CL
+| where TimeGenerated between (StartTime .. EndTime)
+| where DeviceName =~ TargetDevice and RemotePort == 443
+| project EventTimeUTC=format_datetime(TimeGenerated, "yyyy-MM-dd HH:mm:ss"),
+    DeviceId, DeviceName, RemoteIP, RemotePort, ActionType,
+    InitiatingProcessFileName, InitiatingProcessId, InitiatingProcessAccountName
+| order by EventTimeUTC asc
+

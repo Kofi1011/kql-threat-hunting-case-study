@@ -1,0 +1,28 @@
+// Adapted triage template; not executed in this sanitized form.
+// PIDs can be reused: confirm creation time/stable identifiers before attribution.
+let StartTime = datetime(2026-01-01T06:30:00Z);
+let EndTime = datetime(2026-01-01T07:10:00Z);
+let TargetDevice = "lab-web01";
+let TargetHunt = "example-hunt";
+let ChildImage = "cat";
+let ScopedProcesses = materialize(
+    DeviceProcessEvents_CL
+    | where TimeGenerated between (StartTime .. EndTime)
+    | where DeviceName =~ TargetDevice and HuntName =~ TargetHunt
+);
+ScopedProcesses
+| where FileName =~ ChildImage
+| project DeviceId, ChildTime=TimeGenerated, ChildId=ProcessId,
+    ChildCommand=ProcessCommandLine, ParentId=InitiatingProcessId
+| join kind=leftouter (
+    ScopedProcesses
+    | project DeviceId, ParentId=ProcessId, ParentTime=TimeGenerated,
+        ParentImage=FileName, ParentCommand=ProcessCommandLine,
+        GrandparentImage=InitiatingProcessFileName
+) on DeviceId, ParentId
+| extend ParentTimeConsistent = isnotnull(ParentTime) and ParentTime <= ChildTime
+| project ChildTime, ChildId, ChildCommand, ParentId, ParentTime,
+    ParentImage, ParentCommand, GrandparentImage, ParentTimeConsistent
+| order by ChildTime asc
+// Missing parent rows and time-inconsistent candidates remain visible for review.
+

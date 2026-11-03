@@ -1,0 +1,14 @@
+// Adapted template; not executed in this sanitized form.
+// Compare source/operation combinations with an approved CI baseline.
+let StartTime = datetime(2026-01-01T00:00:00Z);
+let EndTime = datetime(2026-01-04T00:00:00Z);
+let TargetHunt = "example-hunt";
+ContainerRegistryLog_CL
+| where TimeGenerated between (StartTime .. EndTime)
+| where HuntName =~ TargetHunt
+| summarize Records=count(), Resources=make_set(Resource, 20),
+    FirstSeen=min(TimeGenerated), LastSeen=max(TimeGenerated)
+    by Username, SrcIpAddr, Operation, HttpStatusCode
+| order by Username asc, SrcIpAddr asc, Operation asc
+// Successful enumeration does not establish that an image contains a credential.
+

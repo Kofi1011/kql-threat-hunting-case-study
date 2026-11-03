@@ -1,0 +1,15 @@
+// Adapted template; not executed in this sanitized form.
+// Review actual request/status content before accepting a success claim.
+let StartTime = datetime(2026-01-01T06:30:00Z);
+let EndTime = datetime(2026-01-01T08:30:00Z);
+let TargetDevice = "lab-admin01";
+let EndpointFragment = "/api/"; // Replace with the scoped endpoint fragment.
+Syslog
+| where TimeGenerated between (StartTime .. EndTime)
+| where Computer =~ TargetDevice
+| where SyslogMessage contains EndpointFragment
+| project EventTimeUTC=format_datetime(TimeGenerated, "yyyy-MM-dd HH:mm:ss"),
+    Computer, SyslogMessage
+| order by EventTimeUTC asc
+// An access denial applies to the matched request; it does not exclude other attempts.
+

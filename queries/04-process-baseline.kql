@@ -1,0 +1,15 @@
+// Adapted template; not executed in this sanitized form.
+// Counts are records, not deduplicated unique executions.
+let StartTime = datetime(2026-01-01T00:00:00Z);
+let EndTime = datetime(2026-01-04T00:00:00Z);
+let TargetDevice = "lab-db01";
+let TargetImage = "pg_dump";
+DeviceProcessEvents_CL
+| where TimeGenerated between (StartTime .. EndTime)
+| where DeviceName =~ TargetDevice and FileName =~ TargetImage
+| summarize Records=count(), FirstSeen=min(TimeGenerated), LastSeen=max(TimeGenerated)
+    by Day=bin(TimeGenerated, 1d), ProcessCommandLine,
+    InitiatingProcessFileName, InitiatingProcessCommandLine, AccountName
+| order by Day asc
+// Inspect event-level times before claiming a regular schedule from daily groups.
+
